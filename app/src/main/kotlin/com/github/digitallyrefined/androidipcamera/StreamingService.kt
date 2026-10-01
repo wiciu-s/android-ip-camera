@@ -863,7 +863,14 @@ class StreamingService : LifecycleService() {
             p.contains("zoom_$phys") -> p.getString("zoom_$phys", null)
             else -> null
         }
-        zoom?.toFloatOrNull()?.let { b.setZoom(it) }
+        zoom?.toFloatOrNull()?.takeIf { it.isFinite() && it > 0f }?.let { requested ->
+            val applied = b.zoomRange()?.clamp(requested) ?: requested
+            if (applied != requested) {
+                p.edit().putString("zoom_$id", String.format(Locale.US, "%.1f", applied)).apply()
+                if (phys.isNotBlank() && phys != id) p.edit().putString("zoom_$phys", String.format(Locale.US, "%.1f", applied)).apply()
+            }
+            b.setZoom(applied)
+        }
 
         val focus = when {
             p.contains("focus_$id") -> p.getString("focus_$id", null)
@@ -1239,7 +1246,11 @@ class StreamingService : LifecycleService() {
                 launchMain { backend?.setExposure(ev) }
             }
             "zoom" -> {
-                val z = value.toFloatOrNull() ?: return
+                val requested = value.toFloatOrNull()?.takeIf { it.isFinite() && it > 0f } ?: return
+                // A direct HTTP request must obey the active camera's real range just like the
+                // slider does. If the backend is not bound yet, retain the valid positive value;
+                // applyStored() will clamp it as soon as the camera reports its range.
+                val z = backend?.zoomRange()?.clamp(requested) ?: requested
                 val zStr = String.format(Locale.US, "%.1f", z)
                 prefs.edit().putString("zoom_$id", zStr).apply()
                 if (physicalId.isNotBlank() && physicalId != id) prefs.edit().putString("zoom_$physicalId", zStr).apply()

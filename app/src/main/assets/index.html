@@ -1180,14 +1180,18 @@
         const zoomEl = getElById('zoom');
         if (!zoomEl) return;
         const cam = selectedCameraInfo();
-        const max = (cam?.zoom?.max) ? parseFloat(cam.zoom.max) : 8;
-        // Some cameras may report a min zoom (e.g. ultra-wide starting at 0)
-        const min = (cam?.zoom?.min) ? parseFloat(cam.zoom.min) : 0.1;
-        // Ensure sensible min/max values
-        zoomEl.max = String((isFinite(max) && max > 0) ? parseFloat(max).toFixed(1) : '8.0');
-        zoomEl.min = String((isFinite(min) && min >= 0) ? parseFloat(min).toFixed(1) : '0.1');
-        if (parseFloat(zoomEl.value) > parseFloat(zoomEl.max)) {
-          zoomEl.value = zoomEl.max;
+        const reportedMax = parseFloat(cam?.zoom?.max);
+        const reportedMin = parseFloat(cam?.zoom?.min);
+        // A valid ratio is positive. In particular, retain sub-1.0 values such as 0.7x
+        // reported by an ultra-wide camera instead of resetting the slider to 1.0x.
+        const min = (Number.isFinite(reportedMin) && reportedMin > 0) ? reportedMin : 0.1;
+        const max = (Number.isFinite(reportedMax) && reportedMax >= min) ? reportedMax : 8.0;
+        zoomEl.max = max.toFixed(1);
+        zoomEl.min = min.toFixed(1);
+        const current = parseFloat(zoomEl.value);
+        const clamped = Number.isFinite(current) ? Math.min(Math.max(current, min), max) : min;
+        if (current !== clamped) {
+          zoomEl.value = clamped.toFixed(1);
           const b = getElById('zoomVal'); if (b) b.textContent = formatControlValue(zoomEl);
         }
       } catch (_) { }

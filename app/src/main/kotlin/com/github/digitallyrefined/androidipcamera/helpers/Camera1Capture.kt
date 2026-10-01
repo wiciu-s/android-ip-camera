@@ -145,6 +145,10 @@ class Camera1Capture(private val cameraId: Int, targetW: Int, targetH: Int) : Ca
             if (r != null) p.zoom = r.indices.minByOrNull { abs(r[it] - want) } ?: 0
         }
     }
+    override fun zoomRange(): ZoomRange? = try {
+        val ratios = camera.parameters.zoomRatios
+        if (ratios.isNullOrEmpty()) null else ZoomRange.from(ratios.first() / 100f, ratios.last() / 100f)
+    } catch (_: Exception) { null }
     /** Robust AF: continuous mode ignores autoFocus(), so switch to AUTO, scan, then restore continuous. */
     override fun triggerAutoFocus() {
         try {

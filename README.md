@@ -180,7 +180,7 @@ Settings can be changed dynamically by passing query parameters in HTTP GET requ
 * **Parameters:**
   * `camera=<id|front|back|toggle>`: Switches the active camera sensor (supports logical:physical ids).
   * `resolution=<low|medium|high|auto|max|WxH>`: Change capture/stream resolution. Use `low|medium|high` for presets; `auto`/`max` or explicit `WxH` may be used to control the negotiated stream size.
-  * `zoom=<value>`: Adjusts digital zoom (e.g., `1.0`, `2.5`).
+  * `zoom=<value>`: Adjusts the camera zoom ratio (e.g., `0.7`, `1.0`, `2.5`). Values below `1.0` select a wider field of view when supported by an ultra-wide camera. The per-camera supported `min` and `max` values are available from `/info.json` in `cameras[].zoom`.
   * `scale=<value>`: Adjusts preview stream scale (per-camera; e.g., `0.5`, `1.0`).
   * `exposure=<value>`: Adjusts exposure value (per-camera).
   * `contrast=<value>`: Adjusts contrast (software; per-camera, integer).
