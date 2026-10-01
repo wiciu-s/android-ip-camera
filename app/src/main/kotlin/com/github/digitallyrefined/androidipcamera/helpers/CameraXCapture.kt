@@ -419,6 +419,9 @@ class CameraXCapture(
     }
     override fun setExposure(ev: Int) { exposureIndex = ev; try { camera?.cameraControl?.setExposureCompensationIndex(ev) } catch (_: Exception) {} }
     override fun setZoom(ratio: Float) { zoomRatio = ratio; applyZoomWithRetry(ratio) }
+    override fun zoomRange(): ZoomRange? = try {
+        camera?.cameraInfo?.zoomState?.value?.let { ZoomRange.from(it.minZoomRatio, it.maxZoomRatio) }
+    } catch (_: Exception) { null }
     @OptIn(ExperimentalCamera2Interop::class)
     override fun triggerAutoFocus() {
         try {

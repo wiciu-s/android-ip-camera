@@ -1962,7 +1962,13 @@ class StreamingServerHelper(
 
                     val computedMax: Float? = try {
                         when {
-                            // If the scaler reports a max digital zoom, trust it directly (no artificial cap)
+                            // The zoom-ratio range is the camera's complete supported interval.
+                            // Prefer its upper bound over SCALER_AVAILABLE_MAX_DIGITAL_ZOOM: the
+                            // latter describes crop zoom and can be broader than the ratio range
+                            // exposed by a logical/physical multi-camera configuration.
+                            rangeRaw != null -> rangeRaw.upper.toFloat()
+                            // Older cameras do not expose CONTROL_ZOOM_RATIO_RANGE; use their
+                            // digital crop maximum as the best available upper bound.
                             scalerMaxRaw != null -> try { (scalerMaxRaw).toFloat() } catch (_: Exception) { null }
                             // Otherwise derive from the same sensor-normalized ratio, inverted
                             thisEffectiveFocal != null && groupMaxEff != null && thisEffectiveFocal > 0f ->

@@ -22,6 +22,8 @@ interface CaptureBackend {
     fun setTorch(on: Boolean)
     fun setExposure(ev: Int)
     fun setZoom(ratio: Float)
+    /** Current camera-reported zoom-ratio bounds, if the backend is ready to expose them. */
+    fun zoomRange(): ZoomRange?
     fun triggerAutoFocus()
     /**
      * Manual focus. [distance] in 0f..1f is a normalized fixed focus distance
